@@ -53,7 +53,7 @@ const connectDB = async () => {
 // })
 // ✅ Correct way — DB connects FIRST, then server starts
 connectDB().then(() => {
-    app.listen(8000, () => {
+    app.listen(process.env.PORT || 8000, () => {
         console.log("Server running on port 8000")
     })
 })
