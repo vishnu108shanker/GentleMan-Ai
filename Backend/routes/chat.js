@@ -115,7 +115,7 @@ try{
     thread.updatedAt = Date.now() ;
     await thread.save() ;
     res.status(200).json({ reply: assistantreply  }) ;
-    // res.status(500).json({ error: "Failed to send response" }) ;
+    res.status(500).json({ error: "Failed to send response" }) ;
   }
 catch (error) {
     console.log(error)  // this will show in terminal
