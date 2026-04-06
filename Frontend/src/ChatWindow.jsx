@@ -2,6 +2,7 @@ import "./ChatWindow.css";
 import Chat from "./Chat.jsx";
 import { MyContext } from "./MyContext.jsx";
 import { useContext, useState } from "react";
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 export default function ChatWindow() {
     const {
@@ -34,14 +35,18 @@ export default function ChatWindow() {
         };
 
         try {
-            const response = await fetch("http://localhost:8000/chat", options);
+            const response = await fetch(`${BASE_URL}/chat`, options);
             const data = await response.json();
-            setReply(data.reply);
+
+            // guard: if backend returned no reply (e.g. Gemini failed), show error msg
+            const replyText = data.reply || "Sorry, I couldn't get a response. Please try again.";
+
+            setReply(replyText);
             setNewChat(false);
             setPrevChats(prev => [
                 ...prev,
                 { role: "user", content: currentPrompt },
-                { role: "assistant", content: data.reply }
+                { role: "assistant", content: replyText }
             ]);
         } catch (error) {
             console.log(error);

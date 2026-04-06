@@ -19,7 +19,8 @@ export default function Chat({ loading }) {
 
     // Typewriter effect
     useEffect(() => {
-        if (reply === null) {
+        // guard against null AND undefined (backend may return undefined if response is bad)
+        if (!reply || typeof reply !== "string") {
             setLatestReply(null);
             return;
         }
@@ -47,7 +48,8 @@ export default function Chat({ loading }) {
     };
 
     // ===== WELCOME SCREEN =====
-    if (newChat && prevChats?.length === 0) {
+    // show only when no messages exist yet
+    if (prevChats?.length === 0) {
         return (
             <div className="chats">
                 <div className="welcome-screen">
@@ -74,49 +76,42 @@ export default function Chat({ loading }) {
     }
 
     // ===== CHAT MESSAGES =====
+    // renders all messages cleanly — no IIFE, no fragile slice logic
     return (
         <div className="chats">
-            {/* All messages except last assistant */}
-            {prevChats?.slice(0, -1).map((chat, index) => (
-                <div key={index} className={chat.role === "user" ? "userDiv" : "gentlemanDiv"}>
-                    {chat.role === "user" ? (
-                        <p className="userMessage">{chat.content}</p>
-                    ) : (
-                        <>
-                            <div className="assistant-header">
-                                <div className="assistant-avatar">G</div>
-                                <span className="assistant-name">Gentleman</span>
-                            </div>
-                            <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
-                                {chat.content}
-                            </ReactMarkdown>
-                        </>
-                    )}
-                </div>
-            ))}
+            {prevChats?.map((chat, index) => {
 
-            {/* Last message (typewriter or static on history load) */}
-            {prevChats?.length > 0 && (() => {
-                const last = prevChats[prevChats.length - 1];
-                if (last.role === "user") {
+                const isLast = index === prevChats.length - 1;
+                const isAssistant = chat.role === "assistant";
+
+                // render user message
+                if (chat.role === "user") {
                     return (
-                        <div className="userDiv" key="last-user">
-                            <p className="userMessage">{last.content}</p>
+                        <div key={index} className="userDiv">
+                            <p className="userMessage">{chat.content}</p>
                         </div>
                     );
                 }
+
+                // render assistant message
+                // if it's the last message, apply typewriter (latestReply)
+                // if it's a history message (not last), show full content as-is
+                const displayContent = isLast
+                    ? (latestReply !== null ? latestReply : chat.content)
+                    : chat.content;
+
                 return (
-                    <div className="gentlemanDiv" key="last-assistant">
+                    <div key={index} className="gentlemanDiv">
                         <div className="assistant-header">
                             <div className="assistant-avatar">G</div>
                             <span className="assistant-name">Gentleman</span>
                         </div>
                         <ReactMarkdown rehypePlugins={[rehypeHighlight]}>
-                            {latestReply === null ? last.content : latestReply}
+                            {displayContent}
                         </ReactMarkdown>
                     </div>
                 );
-            })()}
+            })}
 
             <div ref={bottomRef} />
         </div>
