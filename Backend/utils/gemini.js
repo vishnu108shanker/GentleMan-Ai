@@ -13,17 +13,17 @@ console.log("🔑 Final GEMINI_KEY starts with:", GEMINI_KEY?.substring(0, 8) ??
 const ai = new GoogleGenAI({
   apiKey: GEMINI_KEY
 });
-const getGeminAiResponse = async (message) => {
-  // const { message } = req.body
+const getGeminAiResponse = async (messages) => {
+  // Format history messages for Gemini API
+  const formattedContents = messages.map(msg => ({
+    role: msg.role === "assistant" ? "model" : "user",
+    parts: [{ text: msg.content }]
+  }));
 
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
-      contents:[{
-        text: message,
-        role: "user" ,
-        
-      }]
+      contents: formattedContents
     })
 
   //  const data = await res.json({ reply: response.text })

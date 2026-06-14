@@ -109,7 +109,7 @@ try{
         thread.updatedAt = Date.now() ;
     }         
     
-    const assistantreply = await getGeminAiResponse(message) ;
+    const assistantreply = await getGeminAiResponse(thread.messages) ;
     // const assistantreply = `You said: "${message}"`;
     thread.messages.push({ role: "assistant", content: assistantreply }) ;
     thread.updatedAt = Date.now() ;
